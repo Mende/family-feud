@@ -21,6 +21,7 @@ class App extends Component {
     super();
     this.state = {
       showStrike: false,
+      showQuestion: false,
       scorePool: 0,
       strikeCount: 0,
       currentQuestion: 0,
@@ -88,6 +89,7 @@ class App extends Component {
   render() {
     const {
       showStrike,
+      showQuestion,
       teams,
       questions,
       strikeCount,
@@ -104,7 +106,10 @@ class App extends Component {
           currentTeamIndex={currentTeam}
           teams={teams}
         />
-        <CurrentQuestion question={questions[currentQuestion]} />
+        <CurrentQuestion
+            question={questions[currentQuestion]}
+            showQuestion={showQuestion}
+        />
         {this.showStrike(showStrike)}
         <ReactAudioPlayer
           ref={el => {

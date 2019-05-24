@@ -25,6 +25,7 @@ class Controls extends Component {
 
     this.state = {
       showStrike: false,
+      showQuestion: false,
       scorePool: 0,
       currentQuestion: 0,
       strikeCount: 0,
@@ -48,9 +49,8 @@ class Controls extends Component {
     this.renderAnswer = this.renderAnswer.bind(this);
     this.assignPool = this.assignPool.bind(this);
     this.hideStrike = this.hideStrike.bind(this);
-    this.showOneStrike = this.showOneStrike.bind(this);
-    this.showTwoStrike = this.showTwoStrike.bind(this);
-    this.showThreeStrike = this.showThreeStrike.bind(this);
+    this.showStrike = this.showStrike.bind(this);
+    this.showQuestion = this.showQuestion.bind(this);
     this.playIntro = this.playIntro.bind(this);
     this.currentPool = this.currentPool.bind(this);
   }
@@ -114,6 +114,7 @@ class Controls extends Component {
     const nextQuestion = this.state.currentQuestion + 1;
     const currentQuestion = maxIndex >= nextQuestion ? nextQuestion : maxIndex;
     const dbRef = this.db.ref("/");
+    _.set(this.state, "showQuestion", false);
     dbRef.set({
       ...this.state,
       currentQuestion
@@ -125,10 +126,17 @@ class Controls extends Component {
     const nextQuestion = this.state.currentQuestion - 1;
     const currentQuestion = minIndex <= nextQuestion ? nextQuestion : minIndex;
     const dbRef = this.db.ref("/");
+    _.set(this.state, "showQuestion", false);
     dbRef.set({
       ...this.state,
       currentQuestion
     });
+  }
+
+  showQuestion() {
+    const dbRef = this.db.ref("/");
+    _.set(this.state, "showQuestion", true);
+    dbRef.set(this.state);
   }
 
   playIntro() {
@@ -172,8 +180,7 @@ class Controls extends Component {
     });
   }
 
-  showOneStrike() {
-    const strikeCount = 1;
+  showStrike(strikeCount) {
     const dbRef = this.db.ref("/");
     dbRef.set(this.state);
     dbRef.set({
@@ -181,29 +188,6 @@ class Controls extends Component {
       strikeCount,
       showStrike: true
     });
-    window.setTimeout(this.hideStrike, 2000);
-  }
-
-  showTwoStrike() {
-    const strikeCount = 2;
-    const dbRef = this.db.ref("/");
-    dbRef.set(this.state);
-    dbRef.set({
-      ...this.state,
-      strikeCount,
-      showStrike: true
-    });
-    window.setTimeout(this.hideStrike, 2000);
-  }
-  showThreeStrike() {
-    const strikeCount = 3;
-    const dbRef = this.db.ref("/");
-    dbRef.set(this.state);
-      dbRef.set({
-      ...this.state,
-      strikeCount,
-      showStrike: true
-      });
     window.setTimeout(this.hideStrike, 2000);
   }
 
@@ -273,13 +257,13 @@ class Controls extends Component {
           <section className="col-sm-6" style={{ marginBottom: "1em" }}>
             <div className="btn-toolbar">
               <div className="btn-group btn-group-lg">
-                <button className="btn btn-danger" onClick={this.showOneStrike}>
+                <button className="btn btn-danger" onClick={() =>this.showStrike(1)}>
                   Show One Strike
                 </button>
-                <button className="btn btn-danger" onClick={this.showTwoStrike}>
+                <button className="btn btn-danger" onClick={() =>this.showStrike(2)}>
                   Show Two Strike
                 </button>
-                <button className="btn btn-danger" onClick={this.showThreeStrike}>
+                <button className="btn btn-danger" onClick={() =>this.showStrike(3)}>
                   Show Three Strike
                 </button>
               </div>
@@ -292,6 +276,9 @@ class Controls extends Component {
                 </button>
                 <button onClick={this.playIntro} className="btn btn-info">
                   Play Intro Music
+                </button>
+                <button onClick={this.showQuestion} className="btn btn-info">
+                  Show Question
                 </button>
               </div>
             </div>
