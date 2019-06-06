@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import React, {PropTypes, Component} from 'react';
 import './CurrentQuestion.css';
+import BigStrike from "./BigStrike";
 class CurrentQuestion extends Component {
   static propTypes() {
     return {
@@ -11,10 +12,19 @@ class CurrentQuestion extends Component {
     return {
       question: {
         text: "",
-        answers: []
-      }
+        answers: [],
+      },
+      showQuestion: false
     }
   }
+
+  showQuestion(show, title) {
+    if (show) {
+      return <h1 className="question">{title}</h1>;
+    }
+    return <noop />;
+  }
+
   renderAnswers(answer, index) {
     return (
       <div className={`flip-container vertical ${answer.hidden ? '' : 'flip'}`} key={index}>
@@ -36,11 +46,11 @@ class CurrentQuestion extends Component {
   }
   render() {
     const { question } = this.props;
-    console.log(question);
     const height = Math.round(question.answers.length/2) * 150;
+    const showQuestion = this.props.showQuestion;
     return (
       <div className="cp-current-question">
-        <h1 className="question">{question.text}</h1>
+        {this.showQuestion(showQuestion, question.text)}
         <div className="answerList" style={{height}}>
           {_.chain(question.answers).sortBy('value').reverse().map(this.renderAnswers).value()}
         </div>

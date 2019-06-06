@@ -25,6 +25,7 @@ class Controls extends Component {
 
     this.state = {
       showStrike: false,
+      showQuestion: false,
       scorePool: 0,
       currentQuestion: 0,
       strikeCount: 0,
@@ -48,7 +49,9 @@ class Controls extends Component {
     this.renderAnswer = this.renderAnswer.bind(this);
     this.assignPool = this.assignPool.bind(this);
     this.hideStrike = this.hideStrike.bind(this);
-    this.unlockBuzzer = this.unlockBuzzer.bind(this);
+    this.showStrike = this.showStrike.bind(this);
+    this.showQuestion = this.showQuestion.bind(this);
+    this.playIntro = this.playIntro.bind(this);
     this.currentPool = this.currentPool.bind(this);
   }
 
@@ -58,12 +61,6 @@ class Controls extends Component {
       this.setState(snap.val());
     });
     dbRef.once("value");
-  }
-
-  unlockBuzzer() {
-    _.set(this.state, "buzzerLocked", false);
-    const dbRef = this.db.ref("/");
-    dbRef.set(this.state);
   }
 
   revealAnswer(idx) {
@@ -88,6 +85,7 @@ class Controls extends Component {
     }
     dbRef.set(this.state);
   }
+
   assignPool() {
     const dbRef = this.db.ref("/");
     const currentQuestion = _.get(
@@ -109,7 +107,6 @@ class Controls extends Component {
 
     _.set(this.state, `teams[${this.state.currentTeam}].score`, newScore);
     dbRef.set(this.state);
-    this.nextQuestion();
   }
 
   nextQuestion() {
@@ -117,6 +114,7 @@ class Controls extends Component {
     const nextQuestion = this.state.currentQuestion + 1;
     const currentQuestion = maxIndex >= nextQuestion ? nextQuestion : maxIndex;
     const dbRef = this.db.ref("/");
+    _.set(this.state, "showQuestion", false);
     dbRef.set({
       ...this.state,
       currentQuestion
@@ -128,11 +126,25 @@ class Controls extends Component {
     const nextQuestion = this.state.currentQuestion - 1;
     const currentQuestion = minIndex <= nextQuestion ? nextQuestion : minIndex;
     const dbRef = this.db.ref("/");
+    _.set(this.state, "showQuestion", false);
     dbRef.set({
       ...this.state,
       currentQuestion
     });
   }
+
+  showQuestion() {
+    const dbRef = this.db.ref("/");
+    _.set(this.state, "showQuestion", true);
+    dbRef.set(this.state);
+  }
+
+  playIntro() {
+    const dbRef = this.db.ref("/");
+    _.set(this.state, "playIntro", true);
+    dbRef.set(this.state);
+  }
+
   currentPool() {
     const currentQuestion = _.get(
       this.state,
@@ -166,6 +178,17 @@ class Controls extends Component {
       ...this.state,
       showStrike: false
     });
+  }
+
+  showStrike(strikeCount) {
+    const dbRef = this.db.ref("/");
+    dbRef.set(this.state);
+    dbRef.set({
+      ...this.state,
+      strikeCount,
+      showStrike: true
+    });
+    window.setTimeout(this.hideStrike, 2000);
   }
 
   changeTeams() {
@@ -234,15 +257,14 @@ class Controls extends Component {
           <section className="col-sm-6" style={{ marginBottom: "1em" }}>
             <div className="btn-toolbar">
               <div className="btn-group btn-group-lg">
-                <button className="btn btn-danger" onClick={this.addStrike}>
-                  Add Strike ({strikeCount})
+                <button className="btn btn-danger" onClick={() =>this.showStrike(1)}>
+                  Show One Strike
                 </button>
-                <button
-                  onClick={this.unlockBuzzer}
-                  className="btn btn-danger"
-                  disabled={!buzzerLocked}
-                >
-                  Unlock Buzzer
+                <button className="btn btn-danger" onClick={() =>this.showStrike(2)}>
+                  Show Two Strike
+                </button>
+                <button className="btn btn-danger" onClick={() =>this.showStrike(3)}>
+                  Show Three Strike
                 </button>
               </div>
               <div className="btn-group btn-group-lg">
@@ -251,6 +273,12 @@ class Controls extends Component {
                 </button>
                 <button onClick={this.nextQuestion} className="btn btn-info">
                   <span className="glyphicon glyphicon-chevron-right" />
+                </button>
+                <button onClick={this.playIntro} className="btn btn-info">
+                  Play Intro Music
+                </button>
+                <button onClick={this.showQuestion} className="btn btn-info">
+                  Show Question
                 </button>
               </div>
             </div>
